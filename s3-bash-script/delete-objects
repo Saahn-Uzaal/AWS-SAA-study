@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+echo "== delete multiple objects =="
+
+if [ -z "$1" ]; then
+    echo "Cần có tên bucket"
+    exit 1
+fi
+
+bucket_name="$1"
+
+# Lấy danh sách object trong bucket
+mapfile -t objects < <(
+    aws s3api list-objects-v2 \
+        --bucket "$bucket_name" \
+        --query 'Contents[].Key' \
+        --output text | tr '\t' '\n'
+)
+
+# Bucket rỗng
+if [ ${#objects[@]} -eq 0 ]; then
+    echo "Bucket không có object."
+    exit 0
+fi
+
+echo
+echo "Các object trong bucket:"
+echo
+
+for i in "${!objects[@]}"; do
+    echo "$((i + 1)). ${objects[$i]}"
+done
+
+echo
+read -rp "Chọn file muốn xóa (VD: 1 3 5 hoặc all): " choices
+
+echo
+
+# Xóa tất cả
+if [ "$choices" = "all" ]; then
+
+    for object in "${objects[@]}"; do
+        echo "Deleting: $object"
+
+        aws s3api delete-object \
+            --bucket "$bucket_name" \
+            --key "$object"
+    done
+
+    exit 0
+fi
+
+# Xóa các object được chọn
+for choice in $choices; do
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]]; then
+        echo "Bỏ qua lựa chọn không hợp lệ: $choice"
+        continue
+    fi
+
+    index=$((choice - 1))
+
+    if [ "$index" -lt 0 ] || [ "$index" -ge "${#objects[@]}" ]; then
+        echo "Không có object số $choice"
+        continue
+    fi
+
+    key="${objects[$index]}"
+
+    echo "Deleting: $key"
+
+    aws s3api delete-object \
+        --bucket "$bucket_name" \
+        --key "$key"
+done
