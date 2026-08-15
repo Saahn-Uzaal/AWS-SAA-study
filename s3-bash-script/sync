@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+echo "== sync"
+
+if [ -z "$1" ];then
+    echo "Cần có tên nguồn"
+    exit 1
+fi
+
+if [ -z "$2" ];then
+    echo "Cần có tên đích"
+    exit 1
+fi
+
+bucket_source=$1 
+bucket_destination=$2
+aws s3 sync "$bucket_source" "$bucket_destination"
+

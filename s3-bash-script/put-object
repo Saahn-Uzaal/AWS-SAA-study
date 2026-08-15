@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+echo "== put object"
+
+if [ -z "$1" ];then
+    echo "Cần có tên"
+    exit 1
+fi
+
+if [ -z "$2" ];then
+    echo "Cần có key"
+    exit 1
+fi
+
+if [ -z "$3" ];then
+    echo "Cần có body"
+    exit 1
+fi
+
+bucket_name=$1 
+Key=$2
+Body=$3
+aws s3api put-object \
+--bucket "$bucket_name" \
+--key "$Key" \
+--body "$Body"
+

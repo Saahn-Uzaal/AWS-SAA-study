@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+echo "== list objects"
+
+if [ -z "$1" ];then
+    echo "Cần có tên"
+    exit 1
+fi
+
+bucket_name=$1 
+
+aws s3api list-objects \
+--bucket "$bucket_name" \
+--query Contents[].Key \
+--output table
+
